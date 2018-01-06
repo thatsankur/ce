@@ -94,9 +94,9 @@ function loadAndDisplayContacts() {
    }
 }
 function ping(){
-//     ls = spawn('ping',['google.com']);
+  ls = spawn('ping',['google.com']);
 
-   ls = spawn('top')
+   //ls = spawn('top')
      ls.stdout.on('data', function (data) {
         console.log('stdout: ' + data.toString());
         $('#shell-output').text(data.toString());
@@ -115,4 +115,4 @@ function ping(){
 loadAndDisplayContacts()
 
 listDrives();
-ping();
+//ping();
