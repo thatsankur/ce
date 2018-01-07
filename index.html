@@ -12,21 +12,33 @@
       <title>File System</title>
 
       <style type="text/css">
-            #contact-list {
-                  height: 150px;
-                  overflow-y: auto;
+            #destination {
+                  float: right;
             }
       </style>
       <script type="text/javascript">
-
             $(document).ready(function () {
-
                   $('#drive-table').on('click', 'li', function () {
-
                         var txt = $(this).text();
+                        sd = txt;
                         console.log(txt);
                   });
-
+                  $('#destination').on('click', () => {
+                        if (sd) {
+                              //d = new Date();
+                              file_name =  getDestinationFromDrivePath(sd)
+                              console.log(sd + " file name " + file_name + ' >> '+drv);
+                        }
+                  })
+                  $('#start').on('click', () => {
+                        if (sd) {
+                              source = sd ;
+                              destination = getDestinationFromDrivePath(sd)
+                              console.log('Source '+sd + " destination file " + destination);
+                              startCloaning(source,destination)
+                              //console.log(sd + " file name " + file_name);
+                        }
+                  })
             });
 
       </script>
@@ -44,7 +56,9 @@
                   <ul class="dropdown-menu" id="drive-table">
 
                   </ul>
+                  <button class="btn btn-primary" id="destination">Select Destination</button>
             </div>
+            <button class="btn btn-primary" id="start">Start Analysis</button>
             <div id="shell-output"></div>
             <script src="./view.js"></script>
       </div>

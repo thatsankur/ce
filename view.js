@@ -6,8 +6,8 @@ let snod = 0
 var njds = require('nodejs-disks');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var sd ;
-var drives;
+var sd;
+var drv;
 
 // function execute(command, callback){
 //     exec(command, function(error, stdout, stderr){ callback(stdout); });
@@ -47,6 +47,7 @@ function addDriveEntry(name, size, freeSize) {
 function listDrives() {
     njds.drives(
         function (err, drives) {
+            drv = drives
             njds.drivesDetail(
                 drives,
                 function (err, data) {
@@ -82,6 +83,7 @@ function listDrives() {
         }
     )
 }
+
 // function loadAndDisplayContacts() {  
 
 //    //Check if file exists
@@ -101,6 +103,25 @@ function listDrives() {
 //       })
 //    }
 // }
+//DANGEROUS METHOD 
+function startCloaning(source, destination) {
+    //DO NOT CHANGE IT CAN DAMAGE YOUR DISK
+    ls = spawn('dd', ['if=' + source , 'of=' + destination]);
+    ls.stdout.on('data', function (data) {
+        console.log('stdout: ' + data.toString());
+        $('#shell-output').text(data.toString());
+    });
+
+    ls.stderr.on('data', function (data) {
+        console.log('stderr: ' + data.toString());
+        $('#shell-output').text(data.toString());
+    });
+
+    ls.on('exit', function (code) {
+        console.log('child process exited with code');
+        $('#shell-output').text();
+    });
+}
 function ping() {
     ls = spawn('ping', ['google.com']);
 
@@ -119,6 +140,14 @@ function ping() {
         console.log('child process exited with code');
         $('#shell-output').text();
     });
+}
+function getDestinationFromDrivePath(path){
+    if (path) {
+        len = path.split("/").length;
+        name = path.split("/")[len - 1];
+        destination = name + '.fimg';
+        return destination
+    }
 }
 // loadAndDisplayContacts()
 
