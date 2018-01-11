@@ -20,7 +20,7 @@
                   position: fixed;
                   top: 10;
                   left: 10;
-                  height: 100%;
+                  height: 70%;
                   background-color: black;
                   width: 80%;
                   padding: 0;
@@ -35,33 +35,6 @@
                   overflow-y: scroll;
             }
       </style>
-      <script type="text/javascript">
-            $(document).ready(function () {
-                  $('#drive-table').on('click', 'li', function () {
-                        var txt = $(this).text();
-                        sd = txt;
-                        console.log(txt);
-                  });
-                  $('#destination').on('click', () => {
-                        if (sd) {
-                              //d = new Date();
-                              file_name = getDestinationFromDrivePath(sd)
-                              console.log(sd + " file name " + file_name + ' >> ' + drv);
-                        }
-                  })
-                  $('#start').on('click', () => {
-                        if (sd) {
-                              source = sd;
-                              destination = getDestinationFromDrivePath(sd)
-                              console.log('Source ' + sd + " destination file " + destination);
-                              startCloaning(source, destination)
-                              //console.log(sd + " file name " + file_name);
-                        }
-                  })
-            });
-
-      </script>
-
 </head>
 
 <body>

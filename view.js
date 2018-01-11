@@ -13,8 +13,8 @@ var usb = require('usb')
 var usbDetect = require('usb-detection');
 const drivelist = require('drivelist');
 var path = require('path');
-
-
+var app = require('electron').remote; 
+var dialog = app.dialog;
 
 usbDetect.on('add', listDrives);
 function addAttachListener() {
@@ -64,10 +64,10 @@ function addDriveEntry(name, size, freeSize) {
         // label = snod + '::' + name + '::' + size + '::' + freeSize;
         let updateString = '<li><a href="#">' + name + '</a></li>'
         $('#drive-table').append(updateString)
-        //console.log(len+"=================="+id+" "+label);
+        //writeOutput(len+"=================="+id+" "+label);
         //   jQuery(id).click(function(e){
         //         alert(label);
-        //         console.log("=================="+label);
+        //         writeOutput("=================="+label);
         //     });
     }
 }
@@ -77,14 +77,14 @@ function listDrives() {
         if (error) {
             throw error;
         }
-        console.log(drives);
-        console.log("===========");
+        writeOutput(drives);
+        writeOutput("===========");
 
         for (i = 0; i < drives.length; i++) {
             d = drives[i];
             if (!d.isSystem) {
                 addDriveEntry(d.device, "data[i].total", "data[i].freePer");
-                console.log(d.device);
+                writeOutput(d.device);
             }
         }
     });
@@ -99,30 +99,30 @@ function listDrives1() {
                 function (err, data) {
                     for (var i = 0; i < data.length; i++) {
                         addDriveEntry(data[i].drive, data[i].total, data[i].freePer);
-                        console.log("==================");
+                        writeOutput("==================");
                         /* Get drive mount point */
-                        console.log("Mount Point " + data[i].mountpoint);
+                        writeOutput("Mount Point " + data[i].mountpoint);
 
                         /* Get drive total space */
-                        console.log("Total Space " + data[i].total);
+                        writeOutput("Total Space " + data[i].total);
 
                         /* Get drive used space */
-                        console.log("Used Space " + data[i].used);
+                        writeOutput("Used Space " + data[i].used);
 
                         /* Get drive available space */
-                        console.log("Available Space " + data[i].available);
+                        writeOutput("Available Space " + data[i].available);
 
                         /* Get drive name */
-                        console.log("Name " + data[i].drive);
+                        writeOutput("Name " + data[i].drive);
 
                         /* Get drive used percentage */
-                        console.log("Percentage used " + data[i].usedPer);
+                        writeOutput("Percentage used " + data[i].usedPer);
 
                         /* Get drive free percentage */
-                        console.log("Free Percentage " + data[i].freePer);
+                        writeOutput("Free Percentage " + data[i].freePer);
 
-                        console.log("");
-                        console.log("");
+                        writeOutput("");
+                        writeOutput("");
                     }
                 }
             );
@@ -142,10 +142,10 @@ function listDrives1() {
 //       })
 
 //    } else {
-//       console.log("File Doesn\'t Exist. Creating new file.")
+//       writeOutput("File Doesn\'t Exist. Creating new file.")
 //       fs.writeFile(filename, '', (err) => {
 //          if(err)
-//             console.log(err)
+//             writeOutput(err)
 //       })
 //    }
 // }
@@ -154,17 +154,17 @@ function startCloaning(source, destination) {
     //DO NOT CHANGE IT CAN DAMAGE YOUR DISK
     ls = spawn('dd', ['if=' + source, 'of=' + destination]);
     ls.stdout.on('data', function (data) {
-        console.log('stdout: ' + data.toString());
+        writeOutput('stdout: ' + data.toString());
         $('#shell-output').text(data.toString());
     });
 
     ls.stderr.on('data', function (data) {
-        console.log('stderr: ' + data.toString());
+        writeOutput('stderr: ' + data.toString());
         $('#shell-output').text(data.toString());
     });
 
     ls.on('exit', function (code) {
-        console.log('child process exited with code');
+        writeOutput('child process exited with code');
         $('#shell-output').text();
     });
 }
@@ -173,17 +173,17 @@ function ping() {
 
     //ls = spawn('top')
     ls.stdout.on('data', function (data) {
-        console.log('stdout: ' + data.toString());
+        writeOutput('stdout: ' + data.toString());
         writeOutput("Output.. data ==> "+ data.toString());
     });
 
     ls.stderr.on('data', function (data) {
-        console.log('stderr: ' + data.toString());
+        writeOutput('stderr: ' + data.toString());
         writeOutput("Err.. data ==> "+ data.toString());
     });
 
     ls.on('exit', function (code) {
-        console.log('child process exited with code');
+        writeOutput('child process exited with code');
         writeOutput("exit");
     });
 }
@@ -200,6 +200,38 @@ function writeOutput(message){
          $('#shell-output').append(message+"</br>");
     }
 }
+
+function showFileSaveDialog(){
+    dialog.showSaveDialog((fileName) => {
+        if (fileName === undefined){
+            writeOutput("You didn't save the file");
+            return;
+        }
+        destination = fileName;
+        writeOutput('Source ' + sd + " destination file " + destination);
+       
+    }); 
+}
+
+$(document).ready(function () {
+    $('#drive-table').on('click', 'li', function () {
+          var txt = $(this).text();
+          sd = txt;
+          writeOutput(txt);
+    });
+    $('#destination').on('click', () => {
+          if (sd) {
+                showFileSaveDialog();
+          }
+    })
+    $('#start').on('click', () => {
+          if (sd) {
+                source = sd;
+                //destination = getDestinationFromDrivePath(sd)
+                startCloaning(source, destination);
+          }
+    })
+});
 // loadAndDisplayContacts()
 
 listDrives();
