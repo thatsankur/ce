@@ -15,6 +15,25 @@
             #destination {
                   float: right;
             }
+
+            .output {
+                  position: fixed;
+                  top: 10;
+                  left: 10;
+                  height: 100%;
+                  background-color: black;
+                  width: 80%;
+                  padding: 0;
+                  opacity: 0.9;
+            }
+
+            .scroll-area {
+                  width: 100%;
+                  height: calc(100% - 200px);
+                  float: left;
+                  color: white;
+                  overflow-y: scroll;
+            }
       </style>
       <script type="text/javascript">
             $(document).ready(function () {
@@ -26,16 +45,16 @@
                   $('#destination').on('click', () => {
                         if (sd) {
                               //d = new Date();
-                              file_name =  getDestinationFromDrivePath(sd)
-                              console.log(sd + " file name " + file_name + ' >> '+drv);
+                              file_name = getDestinationFromDrivePath(sd)
+                              console.log(sd + " file name " + file_name + ' >> ' + drv);
                         }
                   })
                   $('#start').on('click', () => {
                         if (sd) {
-                              source = sd ;
+                              source = sd;
                               destination = getDestinationFromDrivePath(sd)
-                              console.log('Source '+sd + " destination file " + destination);
-                              startCloaning(source,destination)
+                              console.log('Source ' + sd + " destination file " + destination);
+                              startCloaning(source, destination)
                               //console.log(sd + " file name " + file_name);
                         }
                   })
@@ -59,7 +78,9 @@
                   <button class="btn btn-primary" id="destination">Select Destination</button>
             </div>
             <button class="btn btn-primary" id="start">Start Analysis</button>
-            <div id="shell-output"></div>
+            <div class="output">
+                  <div id="shell-output" class="scroll-area"></div>
+            </div>
             <script src="./view.js"></script>
       </div>
 </body>

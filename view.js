@@ -1,3 +1,4 @@
+
 let $ = require('jquery')
 let fs = require('fs')
 let filename = 'contacts'
@@ -8,6 +9,32 @@ var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var sd;
 var drv;
+var usb = require('usb')
+var usbDetect = require('usb-detection');
+const drivelist = require('drivelist');
+var path = require('path');
+
+
+
+usbDetect.on('add', listDrives);
+function addAttachListener() {
+    usb.on('attach', function (device) {
+        setTimeout(listDrives,500);
+        writeOutput("Usb Attached")
+        // listDrives();
+        // addAttachListener();
+        // addDeAttachListener();
+    })
+}
+function addDeAttachListener() {
+    usb.on('detach', function (device) {
+        setTimeout(listDrives,500);
+        writeOutput("Usb Removed")
+        // listDrives();
+        // addDeAttachListener();
+        // addAttachListener();
+    })
+}
 
 // function execute(command, callback){
 //     exec(command, function(error, stdout, stderr){ callback(stdout); });
@@ -45,6 +72,25 @@ function addDriveEntry(name, size, freeSize) {
     }
 }
 function listDrives() {
+    $('#drive-table').empty()
+    drivelist.list((error, drives) => {
+        if (error) {
+            throw error;
+        }
+        console.log(drives);
+        console.log("===========");
+
+        for (i = 0; i < drives.length; i++) {
+            d = drives[i];
+            if (!d.isSystem) {
+                addDriveEntry(d.device, "data[i].total", "data[i].freePer");
+                console.log(d.device);
+            }
+        }
+    });
+}
+function listDrives1() {
+    $('#drive-table').empty()
     njds.drives(
         function (err, drives) {
             drv = drives
@@ -106,7 +152,7 @@ function listDrives() {
 //DANGEROUS METHOD 
 function startCloaning(source, destination) {
     //DO NOT CHANGE IT CAN DAMAGE YOUR DISK
-    ls = spawn('dd', ['if=' + source , 'of=' + destination]);
+    ls = spawn('dd', ['if=' + source, 'of=' + destination]);
     ls.stdout.on('data', function (data) {
         console.log('stdout: ' + data.toString());
         $('#shell-output').text(data.toString());
@@ -128,20 +174,20 @@ function ping() {
     //ls = spawn('top')
     ls.stdout.on('data', function (data) {
         console.log('stdout: ' + data.toString());
-        $('#shell-output').text(data.toString());
+        writeOutput("Output.. data ==> "+ data.toString());
     });
 
     ls.stderr.on('data', function (data) {
         console.log('stderr: ' + data.toString());
-        $('#shell-output').text(data.toString());
+        writeOutput("Err.. data ==> "+ data.toString());
     });
 
     ls.on('exit', function (code) {
         console.log('child process exited with code');
-        $('#shell-output').text();
+        writeOutput("exit");
     });
 }
-function getDestinationFromDrivePath(path){
+function getDestinationFromDrivePath(path) {
     if (path) {
         len = path.split("/").length;
         name = path.split("/")[len - 1];
@@ -149,7 +195,14 @@ function getDestinationFromDrivePath(path){
         return destination
     }
 }
+function writeOutput(message){
+    if(message){
+         $('#shell-output').append(message+"</br>");
+    }
+}
 // loadAndDisplayContacts()
 
 listDrives();
+addAttachListener();
+addDeAttachListener();
 //ping();
