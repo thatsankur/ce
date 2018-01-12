@@ -1,9 +1,9 @@
 const { app, BrowserWindow } = require('electron')
 const url = require('url')
 const path = require('path')
-const {ipcMain} = require('electron')  
+const { ipcMain } = require('electron')
 
-let win  
+let win
 
 function createWindow() {
   win = new BrowserWindow({

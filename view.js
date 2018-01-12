@@ -13,13 +13,13 @@ var usb = require('usb')
 var usbDetect = require('usb-detection');
 const drivelist = require('drivelist');
 var path = require('path');
-var app = require('electron').remote; 
+var app = require('electron').remote;
 var dialog = app.dialog;
 
 usbDetect.on('add', listDrives);
 function addAttachListener() {
     usb.on('attach', function (device) {
-        setTimeout(listDrives,500);
+        setTimeout(listDrives, 500);
         writeOutput("Usb Attached")
         // listDrives();
         // addAttachListener();
@@ -28,7 +28,7 @@ function addAttachListener() {
 }
 function addDeAttachListener() {
     usb.on('detach', function (device) {
-        setTimeout(listDrives,500);
+        setTimeout(listDrives, 500);
         writeOutput("Usb Removed")
         // listDrives();
         // addDeAttachListener();
@@ -72,21 +72,21 @@ function addDriveEntry(name, size, freeSize) {
     }
 }
 const df = require('@sindresorhus/df');
-function listDrives(){ 
-$('#drive-table').empty()
-df().then(list => {
-   
-   for(i=0;i<list.length;i++){
-d = list[i];
-	if(d.filesystem.startsWith("/dev")){
-	
-	 console.log(d.filesystem +
-		" size "+ d.size/(1024*1024*1024));
- addDriveEntry(d.filesystem, d.size/(1024*1024*1024), "data[i].freePer");
+function listDrives() {
+    $('#drive-table').empty()
+    df().then(list => {
+
+        for (i = 0; i < list.length; i++) {
+            d = list[i];
+            if (d.filesystem.startsWith("/dev")) {
+
+                console.log(d.filesystem +
+                    " size " + d.size / (1024 * 1024 * 1024));
+                addDriveEntry(d.filesystem, d.size / (1024 * 1024 * 1024), "data[i].freePer");
                 writeOutput(d.device);
-	}
-	}
-});
+            }
+        }
+    });
 }
 function listDrives2() {
     $('#drive-table').empty()
@@ -100,8 +100,8 @@ function listDrives2() {
         for (i = 0; i < drives.length; i++) {
             d = drives[i];
             //if (!d.isSystem) {
-                addDriveEntry(d.device, "data[i].total", "data[i].freePer");
-                writeOutput(d.device);
+            addDriveEntry(d.device, "data[i].total", "data[i].freePer");
+            writeOutput(d.device);
             //}
         }
     });
@@ -144,20 +144,20 @@ function startCloaning(source, destination) {
 
     ls.on('exit', function (code) {
         writeOutput('child process exited with code ' + code);
-	if(code==0){
-$('#sa').show();
-$('#sf').show();
-}
+        if (code == 0) {
+            $('#sa').show();
+            $('#sf').show();
+        }
     });
 }
 function startForeMostAnalysis(imagePath) {
-   var output = require('path').dirname(imagePath)+'/foremost-output';
- try {
-    fs.mkdirSync(output)
-  } catch (err) {
-    if (err.code !== 'EEXIST') throw err
-  }
-    ls = spawn('foremost', ['-T','all','-v','-i',imagePath,'-o',output]);
+    var output = require('path').dirname(imagePath) + '/foremost-output';
+    try {
+        fs.mkdirSync(output)
+    } catch (err) {
+        if (err.code !== 'EEXIST') throw err
+    }
+    ls = spawn('foremost', ['-T', 'all', '-v', '-i', imagePath, '-o', output]);
 
     ls.stdout.on('data', function (data) {
         writeOutput('stdout: ' + data.toString());
@@ -175,13 +175,13 @@ function startForeMostAnalysis(imagePath) {
 }
 
 function startAutopsyAnalysis(imagePath) {
-   var output = require('path').dirname(imagePath)+'/foremost-output';
- try {
-    fs.mkdirSync(output)
-  } catch (err) {
-    if (err.code !== 'EEXIST') throw err
-  }
-    ls = spawn('foremost', ['-T','all','-v','-i',imagePath,'-o',output]);
+    var output = require('path').dirname(imagePath) + '/foremost-output';
+    try {
+        fs.mkdirSync(output)
+    } catch (err) {
+        if (err.code !== 'EEXIST') throw err
+    }
+    ls = spawn('foremost', ['-T', 'all', '-v', '-i', imagePath, '-o', output]);
 
     ls.stdout.on('data', function (data) {
         writeOutput('stdout: ' + data.toString());
@@ -203,12 +203,12 @@ function ping() {
     //ls = spawn('top')
     ls.stdout.on('data', function (data) {
         writeOutput('stdout: ' + data.toString());
-        writeOutput("Output.. data ==> "+ data.toString());
+        writeOutput("Output.. data ==> " + data.toString());
     });
 
     ls.stderr.on('data', function (data) {
         writeOutput('stderr: ' + data.toString());
-        writeOutput("Err.. data ==> "+ data.toString());
+        writeOutput("Err.. data ==> " + data.toString());
     });
 
     ls.on('exit', function (code) {
@@ -224,59 +224,59 @@ function getDestinationFromDrivePath(path) {
         return destination
     }
 }
-function writeOutput(message){
-    if(message){
-         $('#shell-output').append(message+"</br>");
-   $('#shell-output').animate({scrollTop: $('#shell-output').prop("scrollHeight")}, 500);
-    
+function writeOutput(message) {
+    if (message) {
+        $('#shell-output').append(message + "</br>");
+        $('#shell-output').animate({ scrollTop: $('#shell-output').prop("scrollHeight") }, 500);
+
     }
 }
 
-function showFileSaveDialog(){
+function showFileSaveDialog() {
     dialog.showSaveDialog((fileName) => {
-        if (fileName === undefined){
+        if (fileName === undefined) {
             writeOutput("You didn't save the file");
             return;
         }
         destination = fileName;
         writeOutput('Source ' + sd + " destination file " + destination);
-$('#start').show();
-       
-    }); 
+        $('#start').show();
+
+    });
 }
 
 $(document).ready(function () {
- $('#sf').hide();
-$('#destination').hide();
-$('#sa').hide();
-$('#start').hide();
+    $('#sf').hide();
+    $('#destination').hide();
+    $('#sa').hide();
+    $('#start').hide();
     $('#drive-table').on('click', 'li', function () {
-          var txt = $(this).text();
-          sd = txt;
-$('#destination').show();
-          writeOutput(txt);
+        var txt = $(this).text();
+        sd = txt;
+        $('#destination').show();
+        writeOutput(txt);
     });
     $('#destination').on('click', () => {
-          if (sd) {
-                showFileSaveDialog();
-          }
+        if (sd) {
+            showFileSaveDialog();
+        }
     })
     $('#start').on('click', () => {
-          if (sd) {
-                source = sd;
-                //destination = getDestinationFromDrivePath(sd)
-                startCloaning(source, destination);
-          }
+        if (sd) {
+            source = sd;
+            //destination = getDestinationFromDrivePath(sd)
+            startCloaning(source, destination);
+        }
     })
- $('#sf').on('click', () => {
-          if (destination) {
-	      startForeMostAnalysis(destination);
-          }
+    $('#sf').on('click', () => {
+        if (destination) {
+            startForeMostAnalysis(destination);
+        }
     });
- $('#sa').on('click', () => {
-          if (destination) {
-                startAutopsyAnalysis(destination);
-          }
+    $('#sa').on('click', () => {
+        if (destination) {
+            startAutopsyAnalysis(destination);
+        }
     })
 });
 // loadAndDisplayContacts()
