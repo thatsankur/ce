@@ -138,6 +138,7 @@ function listDrives2() {
 function startCloaning(source, destination) {
     //DO NOT CHANGE IT CAN DAMAGE YOUR DISK
     //ls = spawn('dc3dd', ['if=' + source, 'of=' + destination]);
+    $('#start').hide();
     ls = spawn('dcfldd', ['if=' + source, 'of=' + destination]);
     ipcRenderer.send('pid-message', ls.pid);
     ls.stdout.on('data', function (data) {
@@ -148,6 +149,7 @@ function startCloaning(source, destination) {
     ls.stderr.on('data', function (data) {
         writeOutput('stderr: ' + data.toString());
         //writeOutput(data.toString());
+        //$('#start').show();
     });
 
     ls.on('exit', function (code) {
@@ -161,6 +163,7 @@ function startCloaning(source, destination) {
 }
 
 function startForeMostAnalysis(imagePath) {
+    $('#sf').hide();
     output = require('path').dirname(imagePath) + '/foremost-output_' + n;
     try {
         fs.mkdirSync(output)
@@ -177,6 +180,7 @@ function startForeMostAnalysis(imagePath) {
     ls.stderr.on('data', function (data) {
         writeOutput('stderr: ' + data.toString());
         //writeOutput(data.toString());
+        //$('#sf').show();
     });
 
     ls.on('exit', function (code) {
@@ -205,6 +209,7 @@ function createBP(imagePath) {
 
 }
 function startAutopsyAnalysis(imagePath) {
+    $('#sa').hide();
     ls = spawn('autopsy');
     ipcRenderer.send('pid-message', ls.pid);
     ls.stdout.on('data', function (data) {
@@ -214,8 +219,9 @@ function startAutopsyAnalysis(imagePath) {
     });
 
     ls.stderr.on('data', function (data) {
-        writeOutput('stderr: ' + data.toString());
+        writeOutput('stderr: ' + data.toString()+" if autopsy is already running kill it process ");
         //writeOutput(data.toString());
+        $('#sa').show();
     });
 
     ls.on('exit', function (code) {
@@ -286,7 +292,7 @@ function showFileSaveDialog() {
         destination = fileName;
         writeOutput('Source ' + sd + " destination file " + destination);
         $('#start').show();
-
+        $('#destination').hide();
     });
 }
 
@@ -301,6 +307,7 @@ $(document).ready(function () {
         var txt = $(this).text();
         sd = txt;
         $('#destination').show();
+        $('#drive-top').hide();
         writeOutput(txt);
     });
     $('#destination').on('click', () => {
@@ -317,6 +324,7 @@ $(document).ready(function () {
     })
     $('#sf').on('click', () => {
         if (destination) {
+            $('#sf').hide();
             startForeMostAnalysis(destination);
         }
     });
