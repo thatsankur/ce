@@ -13,6 +13,9 @@
     "drivelist": "^6.0.0",
     "electron": "1.7.10",
     "jquery": "^3.2.1",
+    "opn": "^5.1.0",
+    "request": "^2.83.0",
+    "shell": "^0.5.0",
     "usb": "^1.3.1",
     "usb-detection": "^2.0.1"
   },
