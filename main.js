@@ -4,6 +4,7 @@ const path = require('path')
 const { ipcMain } = require('electron')
 var pids = [];
 let win
+var ps = require('ps-node');
 
 function createWindow() {
   win = new BrowserWindow({
@@ -19,22 +20,22 @@ function createWindow() {
     slashes: true
   }))
   win.webContents.openDevTools();
-win.webContents.on('new-window', function(e, url) {
-  e.preventDefault();
-  require('electron').shell.openExternal(url);
-});
+  win.webContents.on('new-window', function (e, url) {
+    e.preventDefault();
+    require('electron').shell.openExternal(url);
+  });
 }
-app.on('before-quit', function() {
-console.log('before-quit', pids);
-  pids.forEach(function(pid) {
+app.on('before-quit', function () {
+  console.log('before-quit', pids);
+  pids.forEach(function (pid) {
     // A simple pid lookup
-    ps.kill( pid, function( err ) {
-        if (err) {
-            throw new Error( err );
-        }
-        else {
-            console.log( 'Process %s has been killed!', pid );
-        }
+    ps.kill(pid, function (err) {
+      if (err) {
+        throw new Error(err);
+      }
+      else {
+        console.log('Process %s has been killed!', pid);
+      }
     });
   });
 });
@@ -93,16 +94,16 @@ ipcMain.on('showError', (event, path) => {
   const fs = require('fs')
   dialog.showErrorDialog(title, content)
 })
-ipcMain.on('pid-message', function(event, arg) {
+ipcMain.on('pid-message', function (event, arg) {
   console.log('Main:', arg);
   pids.push(arg);
 });
-ipcMain.on('pid-message-done', function(event, arg) {
+ipcMain.on('pid-message-done', function (event, arg) {
   console.log('Main ps done:', arg);
-var index = pids.indexOf(arg);
-console.log('Main ps done index:', index);
-console.log('Main ps done index:', pids);
-  pids.splice(index,1);
-console.log('Main ps done index splice :', pids);
+  var index = pids.indexOf(arg);
+  console.log('Main ps done index:', index);
+  console.log('Main ps done index:', pids);
+  pids.splice(index, 1);
+  console.log('Main ps done index splice :', pids);
 });
 app.on('ready', createWindow) 

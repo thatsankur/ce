@@ -18,8 +18,11 @@ var dialog = app.dialog;
 var request = require('request');
 var finalUrl
 const opn = require('opn');
-var {ipcRenderer, remote} = require('electron');  
+var { ipcRenderer, remote } = require('electron');
 var output;
+var d = new Date();
+var n = d.getTime();
+
 usbDetect.on('add', listDrives);
 function addAttachListener() {
     usb.on('attach', function (device) {
@@ -136,7 +139,7 @@ function startCloaning(source, destination) {
     //DO NOT CHANGE IT CAN DAMAGE YOUR DISK
     //ls = spawn('dc3dd', ['if=' + source, 'of=' + destination]);
     ls = spawn('dcfldd', ['if=' + source, 'of=' + destination]);
-ipcRenderer.send('pid-message', ls.pid);
+    ipcRenderer.send('pid-message', ls.pid);
     ls.stdout.on('data', function (data) {
         writeOutput('stdout: ' + data.toString());
         //writeOutput(data.toString());
@@ -153,18 +156,18 @@ ipcRenderer.send('pid-message', ls.pid);
             $('#sa').show();
             $('#sf').show();
         }
-ipcRenderer.send('pid-message-done', ls.pid);
+        ipcRenderer.send('pid-message-done', ls.pid);
     });
 }
 
 function startForeMostAnalysis(imagePath) {
-    output = require('path').dirname(imagePath) + '/foremost-output';
+    output = require('path').dirname(imagePath) + '/foremost-output_' + n;
     try {
         fs.mkdirSync(output)
     } catch (err) {
         if (err.code !== 'EEXIST') throw err
     }
-    ls = spawn('foremost', ['-T', 'all', '-v', '-i', imagePath, '-o', output]);
+    ls = spawn('foremost', ['-t', 'all', '-v', '-i', imagePath, '-o', output]);
 
     ls.stdout.on('data', function (data) {
         writeOutput('stdout: ' + data.toString());
@@ -178,42 +181,36 @@ function startForeMostAnalysis(imagePath) {
 
     ls.on('exit', function (code) {
         writeOutput('child process exited with code ' + code);
-$('#fr').show();
+        $('#fr').show();
     });
 }
-
-function startAutopsyAnalysis(imagePath) {
+function createBP(imagePath) {
     var output = require('path').dirname(imagePath) + '/foremost-output';
     try {
         fs.mkdirSync(output)
     } catch (err) {
         if (err.code !== 'EEXIST') throw err
     }
-  var d = new Date();
-    var n = d.getTime();
-var caseName = 'casename_'+n;
-var hostName = 'host1';
-var addCaseUrl = 'http://localhost:9999/autopsy?mod=0&view=2&case='+caseName+'&desc=&inv1=&inv2=&inv3=&inv4=&inv5=&inv6=&inv7=&inv8=&inv9=&inv10=&x=97&y=13'
-var addHostUrl = 'http://localhost:9999/autopsy?mod=0&view=8&case='+caseName+'&host='+hostName+'&desc=&tz=&ts=0&alert_db=&exclude_db=&x=123&y=7';
-var addDiskUrl = 'http://localhost:9999/autopsy?mod=0&view=14&host='+hostName+'&case='+caseName+'&inv=unknown&img_path='+encodeURI(imagePath)+'&imgtype=volume&sort=1&x=103&y=13';
-var diskAdd = 'http://localhost:9999/autopsy?mod=0&view=15&img_path='+encodeURI(imagePath)+'&num_img=1&sort=1&do_md5=1&md5=&host='+hostName+'&case='+caseName+'&inv=unknown&yes-1=1&start-1=0&end-1=0&mnt-1=%2F1%2F&ftype-1=ext&x=81&y=12';
- finalUrl = 'http://localhost:9999/'+encodeURI('autopsy?mod=1&submod=2&case='+caseName+'&host='+hostName+'&inv=unknown&vol=vol1');
-createCaseHostAndAddDisk(addCaseUrl,addHostUrl,diskAdd,function() {
-		writeOutput('autopsy all done \n\n== \nurl='+finalUrl);
-		
-		$('#ar').show();
+    var caseName = 'casename_' + n;
+    var hostName = 'host1';
+    var addCaseUrl = 'http://localhost:9999/autopsy?mod=0&view=2&case=' + caseName + '&desc=&inv1=&inv2=&inv3=&inv4=&inv5=&inv6=&inv7=&inv8=&inv9=&inv10=&x=97&y=13'
+    var addHostUrl = 'http://localhost:9999/autopsy?mod=0&view=8&case=' + caseName + '&host=' + hostName + '&desc=&tz=&ts=0&alert_db=&exclude_db=&x=123&y=7';
+    var addDiskUrl = 'http://localhost:9999/autopsy?mod=0&view=14&host=' + hostName + '&case=' + caseName + '&inv=unknown&img_path=' + encodeURI(imagePath) + '&imgtype=volume&sort=1&x=103&y=13';
+    var diskAdd = 'http://localhost:9999/autopsy?mod=0&view=15&img_path=' + encodeURI(imagePath) + '&num_img=1&sort=1&do_md5=1&md5=&host=' + hostName + '&case=' + caseName + '&inv=unknown&yes-1=1&start-1=0&end-1=0&mnt-1=%2F1%2F&ftype-1=ext&x=81&y=12';
+    finalUrl = 'http://localhost:9999/' + encodeURI('autopsy?mod=1&submod=2&case=' + caseName + '&host=' + hostName + '&inv=unknown&vol=vol1');
+    createCaseHostAndAddDisk(addCaseUrl, addHostUrl, diskAdd, function () {
+        writeOutput('autopsy all done \n\n== \nurl=' + finalUrl);
+        $('#ar').show();
+    });
 
-
-	});
-
-
-
-
-/*    ls = spawn('foremost', ['-T', 'all', '-v', '-i', imagePath, '-o', output]);
-
+}
+function startAutopsyAnalysis(imagePath) {
+    ls = spawn('autopsy');
+    ipcRenderer.send('pid-message', ls.pid);
     ls.stdout.on('data', function (data) {
         writeOutput('stdout: ' + data.toString());
         //writeOutput(data.toString());
+        createBP(imagePath);
     });
 
     ls.stderr.on('data', function (data) {
@@ -223,27 +220,27 @@ createCaseHostAndAddDisk(addCaseUrl,addHostUrl,diskAdd,function() {
 
     ls.on('exit', function (code) {
         writeOutput('child process exited with code ' + code);
-    });*/
+    });
 }
 
-function createCaseHostAndAddDisk(caseUrl,HostUrl,addDiskUrl,onDone){
-request(caseUrl, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-       	request(HostUrl, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-        console.log(body) // Print the google web page.
- writeOutput(addDiskUrl);
-request(addDiskUrl, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-        console.log(body) // Print the google web page.
-	onDone();
+function createCaseHostAndAddDisk(caseUrl, HostUrl, addDiskUrl, onDone) {
+    request(caseUrl, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            request(HostUrl, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    console.log(body) // Print the google web page.
+                    writeOutput(addDiskUrl);
+                    request(addDiskUrl, function (error, response, body) {
+                        if (!error && response.statusCode == 200) {
+                            console.log(body) // Print the google web page.
+                            onDone();
 
-     }
-})
-     }
-})
-     }
-})
+                        }
+                    })
+                }
+            })
+        }
+    })
 }
 function ping() {
     ls = spawn('ping', ['google.com']);
@@ -298,8 +295,8 @@ $(document).ready(function () {
     $('#destination').hide();
     $('#sa').hide();
     $('#start').hide();
-$('#fr').hide();
-$('#ar').hide();
+    $('#fr').hide();
+    $('#ar').hide();
     $('#drive-table').on('click', 'li', function () {
         var txt = $(this).text();
         sd = txt;
@@ -328,14 +325,14 @@ $('#ar').hide();
             startAutopsyAnalysis(destination);
         }
     })
-$('#ar').on('click', () => {
-writeOutput(finalUrl);
-opn(finalUrl);
+    $('#ar').on('click', () => {
+        writeOutput(finalUrl);
+        opn(finalUrl);
     })
 
-$('#fr').on('click', () => {
-writeOutput(finalUrl);
-opn(output);
+    $('#fr').on('click', () => {
+        writeOutput(finalUrl);
+        opn(output);
     })
 
 
